@@ -1,0 +1,11 @@
+{
+	"id": "map-plugin",
+	"name": "Map Plugin",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Embed maps in your notes using coordinates.",
+	"author": "Frank Marazita",
+	"authorUrl": "",
+	"fundingUrl": "",
+	"isDesktopOnly": false
+}
