@@ -80,6 +80,7 @@ class MapModal extends Modal {
         pinSize: this.settings.pinSize,
         defaultPinColor: this.settings.defaultPinColor,
         height: "100%",
+        app: this.app,
       })
     );
   }
@@ -188,6 +189,7 @@ export default class MapPlugin extends Plugin {
           initialZoom: this.settings.defaultZoom,
           pinSize: this.settings.pinSize,
           defaultPinColor: this.settings.defaultPinColor,
+          app: this.app,
           onOpenModal: () => {
             const modal = new MapModal(
               this.app, 

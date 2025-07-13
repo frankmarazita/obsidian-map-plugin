@@ -11,6 +11,7 @@ describe("parseMapSyntax", () => {
         lat: 40.7589,
         lng: -73.9851,
       });
+      expect(result.pins[0].plusCode).toBeUndefined();
     });
 
     it("should parse coordinates with label", () => {
@@ -220,6 +221,7 @@ describe("parseMapSyntax", () => {
       expect(result.pins).toHaveLength(1);
       expect(result.pins[0].lat).toBeCloseTo(40.32693750000003, 4);
       expect(result.pins[0].lng).toBeCloseTo(-73.73406250000001, 4);
+      expect(result.pins[0].plusCode).toBe("87G8+Q9");
     });
 
     it("should parse Plus Code with label", () => {
@@ -229,6 +231,7 @@ describe("parseMapSyntax", () => {
       expect(result.pins[0].lat).toBeCloseTo(40.32693750000003, 4);
       expect(result.pins[0].lng).toBeCloseTo(-73.73406250000001, 4);
       expect(result.pins[0].label).toBe("New York, NY");
+      expect(result.pins[0].plusCode).toBe("87G8+Q9");
     });
 
     it("should parse Plus Code with label override", () => {

@@ -8,6 +8,7 @@ export interface MapPin {
   icon?: string;
   group?: string;
   description?: string;
+  plusCode?: string;
 }
 
 export interface ParsedMapData {
@@ -86,6 +87,9 @@ function parseMapLine(line: string): MapPin | null {
       const plusCodeLabel = plusCodeMatch[2].trim();
       
       const pin = parsePlusCode(plusCode);
+      
+      // Store the original Plus Code
+      pin.plusCode = plusCode.toUpperCase();
       
       // If there's a label within the Plus Code part, use it
       if (plusCodeLabel) {

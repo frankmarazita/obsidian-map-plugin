@@ -11,6 +11,7 @@ import { Style, Fill, Stroke, Circle, Text } from "ol/style";
 import "ol/ol.css";
 import { calculateBounds } from "./calculateBounds";
 import { type MapPin } from "./parseMapSyntax";
+import { Notice, App } from "obsidian";
 
 interface GroupDropdownProps {
   groups: string[];
@@ -146,6 +147,7 @@ interface MapComponentProps {
   defaultPinColor: string;
   onOpenModal?: () => void;
   height?: string;
+  app?: App;
 }
 
 export const MapComponent: React.FC<MapComponentProps> = ({
@@ -156,6 +158,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   defaultPinColor,
   onOpenModal,
   height = "400px",
+  app,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const olMapRef = useRef<Map | null>(null);
@@ -253,8 +256,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           );
         }
 
-        // Label above the pin (if label exists)
-        if (name) {
+        // Label above the pin (if label exists and is not just coordinates)
+        const isCoordinatesOnly = name === `${pin.lat}, ${pin.lng}`;
+        if (name && !isCoordinatesOnly) {
           styles.push(
             new Style({
               text: new Text({
@@ -392,8 +396,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           );
         }
 
-        // Label above the pin (if label exists)
-        if (name) {
+        // Label above the pin (if label exists and is not just coordinates)
+        const isCoordinatesOnly = name === `${pin.lat}, ${pin.lng}`;
+        if (name && !isCoordinatesOnly) {
           styles.push(
             new Style({
               text: new Text({
@@ -509,9 +514,80 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           
           <div style={{ color: "var(--text-normal)", fontSize: "12px" }}>
             <div style={{ marginBottom: "8px" }}>
-              <div style={{ fontFamily: "monospace", color: "var(--text-muted)", fontSize: "11px" }}>
-                {selectedPin.lat.toFixed(6)}, {selectedPin.lng.toFixed(6)}
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <div style={{ fontFamily: "monospace", color: "var(--text-muted)", fontSize: "11px" }}>
+                  {selectedPin.lat.toFixed(6)}, {selectedPin.lng.toFixed(6)}
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${selectedPin.lat.toFixed(6)}, ${selectedPin.lng.toFixed(6)}`);
+                    if (app) {
+                      new Notice("Coordinates copied to clipboard");
+                    }
+                  }}
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    backgroundColor: "transparent",
+                    border: "1px solid var(--background-modifier-border)",
+                    borderRadius: "2px",
+                    cursor: "pointer",
+                    fontSize: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 0.2s",
+                    padding: "0",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "var(--background-modifier-hover)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                  title="Copy coordinates"
+                >
+                  📋
+                </button>
               </div>
+              {selectedPin.plusCode && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                  <div style={{ fontFamily: "monospace", color: "var(--text-muted)", fontSize: "11px" }}>
+                    {selectedPin.plusCode}
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedPin.plusCode!);
+                      if (app) {
+                        new Notice("Plus Code copied to clipboard");
+                      }
+                    }}
+                    style={{
+                      width: "14px",
+                      height: "14px",
+                      backgroundColor: "transparent",
+                      border: "1px solid var(--background-modifier-border)",
+                      borderRadius: "2px",
+                      cursor: "pointer",
+                      fontSize: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.2s",
+                      padding: "0",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "var(--background-modifier-hover)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                    title="Copy Plus Code"
+                  >
+                    📋
+                  </button>
+                </div>
+              )}
             </div>
             
             {selectedPin.description && (
@@ -522,7 +598,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
               </div>
             )}
             
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center", position: "relative" }}>
               {selectedPin.color && (
                 <div
                   style={{
@@ -552,6 +628,44 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                   {selectedPin.group}
                 </div>
               )}
+              
+              {/* Google Maps icon button - aligned with metadata */}
+              <button
+                onClick={() => {
+                  const url = `https://www.google.com/maps?q=${selectedPin.lat},${selectedPin.lng}`;
+                  window.open(url, '_blank');
+                }}
+                style={{
+                  position: "absolute",
+                  right: "0",
+                  top: "0",
+                  width: "20px",
+                  height: "20px",
+                  backgroundColor: "var(--background-modifier-hover)",
+                  border: "1px solid var(--background-modifier-border)",
+                  borderRadius: "3px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.2s",
+                  padding: "0",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "var(--interactive-accent)";
+                  e.currentTarget.style.color = "white";
+                  e.currentTarget.style.borderColor = "var(--interactive-accent)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "var(--background-modifier-hover)";
+                  e.currentTarget.style.color = "var(--text-normal)";
+                  e.currentTarget.style.borderColor = "var(--background-modifier-border)";
+                }}
+                title="Open in Google Maps"
+              >
+                🌍
+              </button>
             </div>
           </div>
         </div>
