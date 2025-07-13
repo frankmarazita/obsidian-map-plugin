@@ -144,6 +144,8 @@ interface MapComponentProps {
   initialZoom: number;
   pinSize: number;
   defaultPinColor: string;
+  onOpenModal?: () => void;
+  height?: string;
 }
 
 export const MapComponent: React.FC<MapComponentProps> = ({
@@ -152,6 +154,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   initialZoom,
   pinSize,
   defaultPinColor,
+  onOpenModal,
+  height = "400px",
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const olMapRef = useRef<Map | null>(null);
@@ -423,7 +427,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   };
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "400px" }}>
+    <div style={{ position: "relative", width: "100%", height }}>
       <div
         ref={mapRef}
         style={{
@@ -577,6 +581,37 @@ export const MapComponent: React.FC<MapComponentProps> = ({
               setHiddenGroups(newHiddenGroups);
             }}
           />
+        )}
+
+        {/* Modal button */}
+        {onOpenModal && (
+          <button
+            onClick={onOpenModal}
+            style={{
+              width: "28px",
+              height: "28px",
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "14px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(4px)",
+              transition: "background-color 0.2s",
+              color: "white",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+            }}
+            title="Open in full screen"
+          >
+            ⛶
+          </button>
         )}
 
         {/* Reset button */}

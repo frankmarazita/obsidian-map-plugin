@@ -1,8 +1,8 @@
-import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
+import { App, Plugin, PluginSettingTab, Setting, Modal } from "obsidian";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { MapComponent } from "./MapComponent";
-import { parseMapSyntax } from "./parseMapSyntax";
+import { parseMapSyntax, type MapPin } from "./parseMapSyntax";
 
 interface PluginSettings {
   defaultZoom: number;
@@ -20,6 +20,75 @@ interface MapInstance {
   root: any;
   element: HTMLElement;
   renderFunction: () => void;
+}
+
+class MapModal extends Modal {
+  private pins: MapPin[];
+  private initialCenter: [number, number];
+  private settings: PluginSettings;
+  private root: any;
+
+  constructor(app: App, pins: MapPin[], initialCenter: [number, number], settings: PluginSettings) {
+    super(app);
+    this.pins = pins;
+    this.initialCenter = initialCenter;
+    this.settings = settings;
+  }
+
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+    
+    // Set modal size to be larger and ensure proper height
+    this.modalEl.style.width = "90vw";
+    this.modalEl.style.height = "90vh";
+    this.modalEl.style.maxWidth = "1200px";
+    this.modalEl.style.maxHeight = "800px";
+    
+    // Ensure content container uses full height
+    contentEl.style.height = "100%";
+    contentEl.style.display = "flex";
+    contentEl.style.flexDirection = "column";
+    contentEl.style.padding = "20px";
+    contentEl.style.boxSizing = "border-box";
+    
+    // Create title
+    const title = contentEl.createEl("h2", { text: "Map View" });
+    title.style.margin = "0 0 16px 0";
+    title.style.fontSize = "20px";
+    title.style.fontWeight = "600";
+    title.style.color = "var(--text-normal)";
+    title.style.flexShrink = "0";
+    
+    // Create map container that takes remaining space
+    const mapContainer = contentEl.createEl("div");
+    mapContainer.style.width = "100%";
+    mapContainer.style.flex = "1";
+    mapContainer.style.minHeight = "0"; // Important for flex child
+    mapContainer.style.border = "1px solid var(--background-modifier-border)";
+    mapContainer.style.borderRadius = "8px";
+    mapContainer.style.overflow = "hidden";
+    mapContainer.style.position = "relative";
+    
+    // Create React root and render map
+    this.root = createRoot(mapContainer);
+    this.root.render(
+      React.createElement(MapComponent, {
+        pins: this.pins,
+        initialCenter: this.initialCenter,
+        initialZoom: this.settings.defaultZoom,
+        pinSize: this.settings.pinSize,
+        defaultPinColor: this.settings.defaultPinColor,
+        height: "100%",
+      })
+    );
+  }
+
+  onClose() {
+    if (this.root) {
+      this.root.unmount();
+    }
+  }
 }
 
 export default class MapPlugin extends Plugin {
@@ -119,6 +188,15 @@ export default class MapPlugin extends Plugin {
           initialZoom: this.settings.defaultZoom,
           pinSize: this.settings.pinSize,
           defaultPinColor: this.settings.defaultPinColor,
+          onOpenModal: () => {
+            const modal = new MapModal(
+              this.app, 
+              parseResult.pins, 
+              initialCenter as [number, number], 
+              this.settings
+            );
+            modal.open();
+          },
         })
       );
     };
