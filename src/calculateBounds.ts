@@ -1,10 +1,6 @@
-export interface Pin {
-	lat: number;
-	lng: number;
-	label?: string;
-}
+import { type MapPin } from "./parseMapSyntax";
 
-export const calculateBounds = (pins: Pin[]): { center: [number, number]; zoom: number } => {
+export const calculateBounds = (pins: MapPin[]): { center: [number, number]; zoom: number } => {
 	if (pins.length === 0) {
 		return { center: [0, 0], zoom: 2 };
 	}
