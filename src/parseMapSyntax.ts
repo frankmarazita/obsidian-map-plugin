@@ -68,7 +68,7 @@ function parseMapLine(line: string): MapPin | null {
   // Extract comment from end of line first
   let workingLine = line;
   let comment = "";
-  const commentIndex = line.indexOf('#');
+  const commentIndex = line.indexOf("#");
   if (commentIndex !== -1) {
     comment = line.substring(commentIndex + 1).trim();
     workingLine = line.substring(0, commentIndex).trim();
@@ -79,31 +79,31 @@ function parseMapLine(line: string): MapPin | null {
   if (bracketMatch) {
     const contents = bracketMatch[1];
     const remainder = bracketMatch[2];
-    
+
     // Check if contents is a Plus Code
     const plusCodeMatch = contents.match(/^([A-Z0-9]{4,}\+[A-Z0-9]{2,})(.*)$/i);
     if (plusCodeMatch) {
       const plusCode = plusCodeMatch[1];
       const plusCodeLabel = plusCodeMatch[2].trim();
-      
+
       const pin = parsePlusCode(plusCode);
-      
+
       // Store the original Plus Code
       pin.plusCode = plusCode.toUpperCase();
-      
+
       // If there's a label within the Plus Code part, use it
       if (plusCodeLabel) {
         pin.label = parseLabel(plusCodeLabel);
       }
-      
+
       // Parse remainder for label override and JSON attributes
       const finalPin = parseRemainderAndApply(pin, remainder);
-      
+
       // Add comment as description if present
       if (comment) {
         finalPin.description = comment;
       }
-      
+
       return finalPin;
     } else {
       // Try to parse as lat, lng coordinates
@@ -111,12 +111,12 @@ function parseMapLine(line: string): MapPin | null {
       if (coordMatch) {
         const pin = parseBracket(coordMatch[1], coordMatch[2]);
         const finalPin = parseRemainderAndApply(pin, remainder);
-        
+
         // Add comment as description if present
         if (comment) {
           finalPin.description = comment;
         }
-        
+
         return finalPin;
       }
     }
@@ -163,7 +163,10 @@ function parseRemainderAndApply(pin: MapPin, remainder: string): MapPin {
         if (attributes.group && typeof attributes.group === "string") {
           pin.group = attributes.group;
         }
-        if (attributes.description && typeof attributes.description === "string") {
+        if (
+          attributes.description &&
+          typeof attributes.description === "string"
+        ) {
           pin.description = attributes.description;
         }
       }

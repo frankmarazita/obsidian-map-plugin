@@ -166,7 +166,7 @@
 
 [40.7589, -73.9851] Times Square {"color": "red", "icon": "star", "group": "attractions"}
 
-[-37.8136, 144.9631] New York {"color": "blue", "group": "cities"}
+[-37.8136, 144.9631] Melbourne {"color": "blue", "group": "cities"}
 
 [48.8566, 2.3522] Paris {"color": "purple", "group": "cities"}
 
@@ -188,11 +188,11 @@ Supported colors: red, blue, green, yellow, orange, purple, pink, brown, gray, b
 
 ```map
 
-[87G8+Q9] Times Square Area
+[87G8Q257+HX] Times Square
 
-[87G7+WM] Brooklyn Area
+[87G7MXQ4+M6] Statue of Liberty
 
-[87G8+2G] Queens Area
+[87G8Q224+5J] Empire State Building
 
 ```
 
@@ -200,11 +200,11 @@ Supported colors: red, blue, green, yellow, orange, purple, pink, brown, gray, b
 
 ```map
 
-[87G8+Q9 New York, NY] America's largest city
+[87G8Q257+HX Times Square, NY] America's crossroads
 
-[87G7+WM Brooklyn, NY] {"color": "red", "icon": "star"}
+[87G7MXQ4+M6 Liberty Island, NY] {"color": "red", "icon": "star"}
 
-[87G8+2G Queens, NY] Local neighborhood
+[87G8Q224+5J Midtown, NY] Iconic skyscraper
 
 ```
 
@@ -212,9 +212,9 @@ Supported colors: red, blue, green, yellow, orange, purple, pink, brown, gray, b
 
 ```map
 
-[87G8+Q9 New York, NY] My Custom Label
+[87G8Q257+HX Times Square, NY] My Custom Label
 
-[87G7+WM Brooklyn, NY] Different Label {"color": "blue"}
+[87G7MXQ4+M6 Liberty Island, NY] Different Label {"color": "blue"}
 
 ```
 
@@ -312,13 +312,13 @@ Supported colors: red, blue, green, yellow, orange, purple, pink, brown, gray, b
 
 # New York Food Scene
 
-[87G8+Q9] {"color": "red", "icon": "restaurant"} # NY area dining district
+[87G8Q257+HX] {"color": "red", "icon": "restaurant"} # Times Square dining district
 
-[87G7+WM Brooklyn, NY] {"color": "orange"} # Brooklyn area restaurants
+[87G7MXQ4+M6 Liberty Island, NY] {"color": "orange"} # Harbor area restaurants
 
-[87G8+2G Queens, NY] {"color": "green"} # Queens neighborhood dining
+[87G8Q224+5J Midtown, NY] {"color": "green"} # Business district dining
 
-[87F8+XQ Bronx, NY] {"color": "blue"} # Bronx area local cuisine
+[87G8Q2MM+5R Central Park, NY] {"color": "blue"} # Park area cafes and food
 
 ```
 

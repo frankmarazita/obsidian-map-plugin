@@ -75,7 +75,8 @@ const GroupDropdown: React.FC<GroupDropdownProps> = ({
               backgroundColor: "var(--background-primary)",
               border: "1px solid var(--background-modifier-border)",
               borderRadius: "6px",
-              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.15)",
+              boxShadow:
+                "0 4px 16px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.15)",
               minWidth: "140px",
               maxWidth: "200px",
               zIndex: 1000,
@@ -107,7 +108,8 @@ const GroupDropdown: React.FC<GroupDropdownProps> = ({
                   gap: "8px",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "var(--background-modifier-hover)";
+                  e.currentTarget.style.backgroundColor =
+                    "var(--background-modifier-hover)";
                   e.currentTarget.style.color = "var(--text-accent)";
                 }}
                 onMouseLeave={(e) => {
@@ -115,19 +117,25 @@ const GroupDropdown: React.FC<GroupDropdownProps> = ({
                   e.currentTarget.style.color = "var(--text-normal)";
                 }}
               >
-                <span style={{ 
-                  fontSize: "14px", 
-                  fontWeight: "600",
-                  color: hiddenGroups.has(group) ? "var(--text-muted)" : "var(--text-accent)"
-                }}>
+                <span
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: hiddenGroups.has(group)
+                      ? "var(--text-muted)"
+                      : "var(--text-accent)",
+                  }}
+                >
                   {hiddenGroups.has(group) ? "☐" : "☑"}
                 </span>
-                <span style={{ 
-                  flex: 1,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis"
-                }}>
+                <span
+                  style={{
+                    flex: 1,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
                   {group}
                 </span>
               </div>
@@ -169,7 +177,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
 
   // Group filtering state
   const [hiddenGroups, setHiddenGroups] = useState<Set<string>>(new Set());
-  
+
   // Pin selection state
   const [selectedPin, setSelectedPin] = useState<MapPin | null>(null);
 
@@ -186,10 +194,14 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       (pin) => !pin.group || !hiddenGroups.has(pin.group)
     );
 
+    // Parse height to get numeric value (assume pixels if no unit specified)
+    const containerHeight = parseInt(height.replace(/[^\d]/g, "")) || 400;
+    const containerWidth = mapRef.current?.clientWidth || 400;
+
     // Calculate optimal view for visible pins
     const optimalView =
       visiblePins.length > 1
-        ? calculateBounds(visiblePins)
+        ? calculateBounds(visiblePins, containerWidth, containerHeight)
         : { center: initialCenter, zoom: initialZoom };
     initialViewRef.current = optimalView;
 
@@ -230,9 +242,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
             image: new Circle({
               radius: isSelected ? pinSize + 3 : pinSize,
               fill: new Fill({ color: pinColor }),
-              stroke: new Stroke({ 
-                color: isSelected ? "#ffd700" : "#ffffff", 
-                width: isSelected ? 4 : 3 
+              stroke: new Stroke({
+                color: isSelected ? "#ffd700" : "#ffffff",
+                width: isSelected ? 4 : 3,
               }),
             }),
           })
@@ -295,13 +307,13 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     });
 
     // Add click handler for pin selection
-    map.on('click', (event) => {
+    map.on("click", (event) => {
       const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => {
         return feature;
       });
-      
+
       if (feature) {
-        const clickedPin = feature.get('pin') as MapPin;
+        const clickedPin = feature.get("pin") as MapPin;
         if (selectedPin && selectedPin === clickedPin) {
           // Deselect if clicking the same pin
           setSelectedPin(null);
@@ -316,13 +328,13 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     });
 
     // Add pointer cursor on pin hover
-    map.on('pointermove', (event) => {
+    map.on("pointermove", (event) => {
       const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => {
         return feature;
       });
-      
+
       // Change cursor to pointer when hovering over a pin
-      map.getTargetElement().style.cursor = feature ? 'pointer' : '';
+      map.getTargetElement().style.cursor = feature ? "pointer" : "";
     });
 
     olMapRef.current = map;
@@ -353,9 +365,21 @@ export const MapComponent: React.FC<MapComponentProps> = ({
 
     // Only recalculate if we have visible pins and the map is already created
     if (visiblePins.length > 0) {
-      const optimalView = visiblePins.length > 1
-        ? calculateBounds(visiblePins)
-        : { center: [visiblePins[0].lng, visiblePins[0].lat] as [number, number], zoom: initialZoom };
+      // Get current container dimensions
+      const containerHeight = parseInt(height.replace(/[^\d]/g, "")) || 400;
+      const containerWidth =
+        olMapRef.current.getTargetElement()?.clientWidth || 400;
+
+      const optimalView =
+        visiblePins.length > 1
+          ? calculateBounds(visiblePins, containerWidth, containerHeight)
+          : {
+              center: [visiblePins[0].lng, visiblePins[0].lat] as [
+                number,
+                number,
+              ],
+              zoom: initialZoom,
+            };
 
       // Update to the new bounds immediately
       const view = olMapRef.current.getView();
@@ -372,8 +396,10 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     if (!olMapRef.current) return;
 
     const layers = olMapRef.current.getLayers().getArray();
-    const vectorLayer = layers.find(layer => layer instanceof VectorLayer) as VectorLayer<VectorSource>;
-    
+    const vectorLayer = layers.find(
+      (layer) => layer instanceof VectorLayer
+    ) as VectorLayer<VectorSource>;
+
     if (vectorLayer) {
       // Update the style function to use current selectedPin value
       vectorLayer.setStyle((feature) => {
@@ -395,9 +421,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
             image: new Circle({
               radius: isSelected ? pinSize + 3 : pinSize,
               fill: new Fill({ color: pinColor }),
-              stroke: new Stroke({ 
-                color: isSelected ? "#ffd700" : "#ffffff", 
-                width: isSelected ? 4 : 3 
+              stroke: new Stroke({
+                color: isSelected ? "#ffd700" : "#ffffff",
+                width: isSelected ? 4 : 3,
               }),
             }),
           })
@@ -466,7 +492,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           border: "1px solid var(--background-modifier-border)",
         }}
       />
-      
+
       {/* Pin details panel */}
       {selectedPin && (
         <div
@@ -525,7 +551,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
               title="Close details"
               onMouseEnter={(e) => {
                 e.currentTarget.style.color = "var(--text-normal)";
-                e.currentTarget.style.backgroundColor = "var(--background-modifier-hover)";
+                e.currentTarget.style.backgroundColor =
+                  "var(--background-modifier-hover)";
                 e.currentTarget.style.borderRadius = "3px";
               }}
               onMouseLeave={(e) => {
@@ -536,16 +563,26 @@ export const MapComponent: React.FC<MapComponentProps> = ({
               ×
             </button>
           </div>
-          
+
           <div style={{ color: "var(--text-normal)", fontSize: "12px" }}>
             <div style={{ marginBottom: "8px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <div style={{ fontFamily: "monospace", color: "var(--text-muted)", fontSize: "11px" }}>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
+              >
+                <div
+                  style={{
+                    fontFamily: "monospace",
+                    color: "var(--text-muted)",
+                    fontSize: "11px",
+                  }}
+                >
                   {selectedPin.lat.toFixed(6)}, {selectedPin.lng.toFixed(6)}
                 </div>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(`${selectedPin.lat.toFixed(6)}, ${selectedPin.lng.toFixed(6)}`);
+                    navigator.clipboard.writeText(
+                      `${selectedPin.lat.toFixed(6)}, ${selectedPin.lng.toFixed(6)}`
+                    );
                     if (app) {
                       new Notice("Coordinates copied to clipboard");
                     }
@@ -565,7 +602,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                     padding: "0",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "var(--background-modifier-hover)";
+                    e.currentTarget.style.backgroundColor =
+                      "var(--background-modifier-hover)";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = "transparent";
@@ -576,8 +614,21 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                 </button>
               </div>
               {selectedPin.plusCode && (
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                  <div style={{ fontFamily: "monospace", color: "var(--text-muted)", fontSize: "11px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    marginTop: "2px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "monospace",
+                      color: "var(--text-muted)",
+                      fontSize: "11px",
+                    }}
+                  >
                     {selectedPin.plusCode}
                   </div>
                   <button
@@ -602,7 +653,8 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                       padding: "0",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "var(--background-modifier-hover)";
+                      e.currentTarget.style.backgroundColor =
+                        "var(--background-modifier-hover)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "transparent";
@@ -614,7 +666,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                 </div>
               )}
             </div>
-            
+
             {selectedPin.description && (
               <div style={{ marginBottom: "8px" }}>
                 <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>
@@ -622,43 +674,54 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                 </div>
               </div>
             )}
-            
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center", position: "relative" }}>
+
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "8px",
+                alignItems: "center",
+                position: "relative",
+              }}
+            >
               {selectedPin.color && (
                 <div
                   style={{
                     width: "12px",
                     height: "12px",
                     borderRadius: "50%",
-                    backgroundColor: getColorValue(selectedPin.color) || defaultPinColor,
+                    backgroundColor:
+                      getColorValue(selectedPin.color) || defaultPinColor,
                     border: "1px solid var(--background-modifier-border)",
                   }}
                 />
               )}
-              
+
               {selectedPin.icon && (
                 <span style={{ fontSize: "12px" }}>
                   {getIconText(selectedPin.icon)}
                 </span>
               )}
-              
+
               {selectedPin.group && (
-                <div style={{ 
-                  backgroundColor: "var(--background-modifier-hover)",
-                  padding: "2px 6px",
-                  borderRadius: "4px",
-                  fontSize: "10px",
-                  color: "var(--text-muted)"
-                }}>
+                <div
+                  style={{
+                    backgroundColor: "var(--background-modifier-hover)",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    fontSize: "10px",
+                    color: "var(--text-muted)",
+                  }}
+                >
                   {selectedPin.group}
                 </div>
               )}
-              
+
               {/* Google Maps icon button - aligned with metadata */}
               <button
                 onClick={() => {
                   const url = `https://www.google.com/maps?q=${selectedPin.lat},${selectedPin.lng}`;
-                  window.open(url, '_blank');
+                  window.open(url, "_blank");
                 }}
                 style={{
                   position: "absolute",
@@ -678,14 +741,18 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                   padding: "0",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "var(--interactive-accent)";
+                  e.currentTarget.style.backgroundColor =
+                    "var(--interactive-accent)";
                   e.currentTarget.style.color = "white";
-                  e.currentTarget.style.borderColor = "var(--interactive-accent)";
+                  e.currentTarget.style.borderColor =
+                    "var(--interactive-accent)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "var(--background-modifier-hover)";
+                  e.currentTarget.style.backgroundColor =
+                    "var(--background-modifier-hover)";
                   e.currentTarget.style.color = "var(--text-normal)";
-                  e.currentTarget.style.borderColor = "var(--background-modifier-border)";
+                  e.currentTarget.style.borderColor =
+                    "var(--background-modifier-border)";
                 }}
                 title="Open in Google Maps"
               >

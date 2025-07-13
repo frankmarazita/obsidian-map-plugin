@@ -28,7 +28,12 @@ class MapModal extends Modal {
   private settings: PluginSettings;
   private root: any;
 
-  constructor(app: App, pins: MapPin[], initialCenter: [number, number], settings: PluginSettings) {
+  constructor(
+    app: App,
+    pins: MapPin[],
+    initialCenter: [number, number],
+    settings: PluginSettings
+  ) {
     super(app);
     this.pins = pins;
     this.initialCenter = initialCenter;
@@ -38,20 +43,20 @@ class MapModal extends Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.empty();
-    
+
     // Set modal size to be larger and ensure proper height
     this.modalEl.style.width = "90vw";
     this.modalEl.style.height = "90vh";
     this.modalEl.style.maxWidth = "1200px";
     this.modalEl.style.maxHeight = "800px";
-    
+
     // Ensure content container uses full height
     contentEl.style.height = "100%";
     contentEl.style.display = "flex";
     contentEl.style.flexDirection = "column";
     contentEl.style.padding = "20px";
     contentEl.style.boxSizing = "border-box";
-    
+
     // Create title
     const title = contentEl.createEl("h2", { text: "Map View" });
     title.style.margin = "0 0 16px 0";
@@ -59,7 +64,7 @@ class MapModal extends Modal {
     title.style.fontWeight = "600";
     title.style.color = "var(--text-normal)";
     title.style.flexShrink = "0";
-    
+
     // Create map container that takes remaining space
     const mapContainer = contentEl.createEl("div");
     mapContainer.style.width = "100%";
@@ -69,7 +74,7 @@ class MapModal extends Modal {
     mapContainer.style.borderRadius = "8px";
     mapContainer.style.overflow = "hidden";
     mapContainer.style.position = "relative";
-    
+
     // Create React root and render map
     this.root = createRoot(mapContainer);
     this.root.render(
@@ -192,9 +197,9 @@ export default class MapPlugin extends Plugin {
           app: this.app,
           onOpenModal: () => {
             const modal = new MapModal(
-              this.app, 
-              parseResult.pins, 
-              initialCenter as [number, number], 
+              this.app,
+              parseResult.pins,
+              initialCenter as [number, number],
               this.settings
             );
             modal.open();

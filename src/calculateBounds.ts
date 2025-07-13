@@ -1,7 +1,9 @@
 import { type MapPin } from "./parseMapSyntax";
 
 export const calculateBounds = (
-  pins: MapPin[]
+  pins: MapPin[],
+  containerWidth = 400,
+  containerHeight = 400
 ): { center: [number, number]; zoom: number } => {
   if (pins.length === 0) {
     return { center: [0, 0], zoom: 2 };
@@ -14,55 +16,81 @@ export const calculateBounds = (
   const lats = pins.map((p) => p.lat);
   const lngs = pins.map((p) => p.lng);
 
-  const minLat = Math.min(...lats);
-  const maxLat = Math.max(...lats);
-  const centerLat = (minLat + maxLat) / 2;
-
-  // Handle longitude with date line crossing
+  let minLat = Math.min(...lats);
+  let maxLat = Math.max(...lats);
   let minLng = Math.min(...lngs);
   let maxLng = Math.max(...lngs);
-  let centerLng: number;
-  let lngSpan: number;
 
-  // Check if we cross the date line (span > 180°)
+  // Handle date line crossing
   const directSpan = maxLng - minLng;
+  let lngSpan = directSpan;
+  let centerLng = (minLng + maxLng) / 2;
+
+  // Only use date line crossing if:
+  // 1. One longitude is close to +180 and another close to -180
+  // 2. The crossing path is actually shorter
   if (directSpan > 180) {
-    // We cross the date line, calculate the shorter path
-    const crossDateLineSpan = minLng + 360 - maxLng;
-    if (crossDateLineSpan < directSpan) {
-      // Use the shorter path across date line
-      centerLng = (minLng + maxLng + 360) / 2;
-      if (centerLng > 180) centerLng -= 360;
-      lngSpan = crossDateLineSpan;
-    } else {
-      // Use direct span
-      centerLng = (minLng + maxLng) / 2;
-      lngSpan = directSpan;
+    // True date line crossing: one point near +180, another near -180
+    const nearDateLine = minLng < -150 && maxLng > 150;
+
+    if (nearDateLine) {
+      const crossSpan = 360 - directSpan;
+
+      if (crossSpan < directSpan) {
+        // Use the shorter path across date line
+        lngSpan = crossSpan;
+
+        // Calculate center going the "short way" around the world
+        centerLng = (minLng + 360 + maxLng) / 2;
+        if (centerLng > 180) centerLng -= 360;
+      }
     }
-  } else {
-    // Normal case, no date line crossing
-    centerLng = (minLng + maxLng) / 2;
-    lngSpan = directSpan;
+    // Otherwise use direct span even if > 180° (e.g., NY to Melbourne)
   }
 
-  // Calculate zoom based on the largest span
   const latSpan = maxLat - minLat;
-  const maxSpan = Math.max(latSpan, lngSpan);
+  const centerLat = (minLat + maxLat) / 2;
 
-  let zoom: number;
-  if (maxSpan < 0.01)
-    zoom = 15; // Very close (< 1km)
-  else if (maxSpan < 0.1)
-    zoom = 12; // City level (< 10km)
-  else if (maxSpan < 1)
-    zoom = 9; // Metropolitan area (< 100km)
-  else if (maxSpan < 10)
-    zoom = 6; // Country/state level (< 1000km)
-  else if (maxSpan < 50)
-    zoom = 4; // Continental level (< 5000km)
-  else if (maxSpan < 100)
-    zoom = 3; // Large continental (< 10000km)
-  else zoom = 2; // Global level
+  // Adaptive padding: smaller percentage for very small spans, larger for big spans
+  // For very close pins (< 0.01°), use minimal padding
+  // For larger spans, use percentage-based padding
+  const getAdaptivePadding = (span: number): number => {
+    if (span < 0.001) return 0.0001; // Very close pins - minimal padding
+    if (span < 0.01) return Math.max(span * 0.08, 0.0005); // Close pins - 8% padding
+    if (span < 1) return span * 0.04; // Regional - 4% padding
+    return span * 0.03; // Large spans - 3% padding
+  };
+
+  const latPadding = getAdaptivePadding(latSpan);
+  const lngPadding = getAdaptivePadding(lngSpan);
+
+  const paddedLatSpan = latSpan + 2 * latPadding;
+  const paddedLngSpan = lngSpan + 2 * lngPadding;
+
+  // Web Mercator zoom calculation
+  // At zoom level z: world width = 256 * 2^z pixels, world spans 360 degrees longitude
+  const zoomLng = Math.log2((containerWidth * 360) / (paddedLngSpan * 256));
+
+  // For latitude in Web Mercator: account for projection distortion
+  // Convert latitude span to Mercator y-coordinate span
+  const toMercatorY = (lat: number) =>
+    Math.log(Math.tan(((90 + lat) * Math.PI) / 360));
+
+  const paddedMinLat = Math.max(-85, centerLat - paddedLatSpan / 2);
+  const paddedMaxLat = Math.min(85, centerLat + paddedLatSpan / 2);
+
+  const mercatorSpan = toMercatorY(paddedMaxLat) - toMercatorY(paddedMinLat);
+  const worldMercatorHeight = toMercatorY(85) - toMercatorY(-85); // Total Mercator height
+
+  const zoomLat = Math.log2(
+    (containerHeight * worldMercatorHeight) / (mercatorSpan * 256)
+  );
+
+  // Use the more restrictive zoom to ensure everything fits
+  let zoom = Math.min(zoomLng, zoomLat);
+
+  // Clamp and floor to ensure all pins are visible
+  zoom = Math.max(1, Math.min(18, Math.floor(zoom)));
 
   return { center: [centerLng, centerLat], zoom };
 };

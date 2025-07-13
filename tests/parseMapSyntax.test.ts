@@ -122,7 +122,7 @@ describe("parseMapSyntax", () => {
 
       expect(result.pins[1]).toEqual({
         lat: 40.7128,
-        lng: -74.0060,
+        lng: -74.006,
         label: "New York",
         color: "blue",
         group: "cities",
@@ -309,14 +309,16 @@ describe("parseMapSyntax", () => {
 
   describe("comment syntax", () => {
     it("should parse comment as description for coordinates", () => {
-      const result = parseMapSyntax("[40.7589, -73.9851] Times Square # Famous tourist attraction in NYC");
+      const result = parseMapSyntax(
+        "[40.7589, -73.9851] Times Square # Famous tourist attraction in NYC"
+      );
       expect(result.errors).toHaveLength(0);
       expect(result.pins).toHaveLength(1);
       expect(result.pins[0]).toEqual({
         lat: 40.7589,
         lng: -73.9851,
         label: "Times Square",
-        description: "Famous tourist attraction in NYC"
+        description: "Famous tourist attraction in NYC",
       });
     });
 
@@ -331,34 +333,40 @@ describe("parseMapSyntax", () => {
     });
 
     it("should parse comment with JSON attributes", () => {
-      const result = parseMapSyntax('[40.7589, -73.9851] Times Square {"color": "red"} # Tourist hotspot');
+      const result = parseMapSyntax(
+        '[40.7589, -73.9851] Times Square {"color": "red"} # Tourist hotspot'
+      );
       expect(result.errors).toHaveLength(0);
       expect(result.pins[0]).toEqual({
         lat: 40.7589,
         lng: -73.9851,
         label: "Times Square",
         color: "red",
-        description: "Tourist hotspot"
+        description: "Tourist hotspot",
       });
     });
 
     it("should prefer comment over JSON description", () => {
-      const result = parseMapSyntax('[40.7589, -73.9851] {"description": "JSON description"} # Comment description');
+      const result = parseMapSyntax(
+        '[40.7589, -73.9851] {"description": "JSON description"} # Comment description'
+      );
       expect(result.errors).toHaveLength(0);
       expect(result.pins[0]).toEqual({
         lat: 40.7589,
         lng: -73.9851,
-        description: "Comment description"
+        description: "Comment description",
       });
     });
 
     it("should use JSON description when no comment present", () => {
-      const result = parseMapSyntax('[40.7589, -73.9851] {"description": "JSON description"}');
+      const result = parseMapSyntax(
+        '[40.7589, -73.9851] {"description": "JSON description"}'
+      );
       expect(result.errors).toHaveLength(0);
       expect(result.pins[0]).toEqual({
         lat: 40.7589,
         lng: -73.9851,
-        description: "JSON description"
+        description: "JSON description",
       });
     });
 
@@ -368,7 +376,7 @@ describe("parseMapSyntax", () => {
       expect(result.pins[0]).toEqual({
         lat: 40.7589,
         lng: -73.9851,
-        description: "Just a comment"
+        description: "Just a comment",
       });
     });
 
@@ -378,7 +386,7 @@ describe("parseMapSyntax", () => {
       expect(result.pins[0]).toEqual({
         lat: 40.7589,
         lng: -73.9851,
-        label: "Times Square"
+        label: "Times Square",
       });
     });
 
@@ -391,7 +399,7 @@ describe("parseMapSyntax", () => {
       const result = parseMapSyntax(input);
       expect(result.errors).toHaveLength(0);
       expect(result.pins).toHaveLength(3);
-      
+
       expect(result.pins[0].description).toBe("NYC landmark");
       expect(result.pins[1].description).toBe("American city");
       expect(result.pins[2].description).toBe("City of lights");
