@@ -681,52 +681,51 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                 flexWrap: "wrap",
                 gap: "8px",
                 alignItems: "center",
-                position: "relative",
+                justifyContent: "space-between",
               }}
             >
-              {selectedPin.color && (
-                <div
-                  style={{
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    backgroundColor:
-                      getColorValue(selectedPin.color) || defaultPinColor,
-                    border: "1px solid var(--background-modifier-border)",
-                  }}
-                />
-              )}
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                {selectedPin.color && (
+                  <div
+                    style={{
+                      width: "12px",
+                      height: "12px",
+                      borderRadius: "50%",
+                      backgroundColor:
+                        getColorValue(selectedPin.color) || defaultPinColor,
+                      border: "1px solid var(--background-modifier-border)",
+                    }}
+                  />
+                )}
 
-              {selectedPin.icon && (
-                <span style={{ fontSize: "12px" }}>
-                  {getIconText(selectedPin.icon)}
-                </span>
-              )}
+                {selectedPin.icon && (
+                  <span style={{ fontSize: "12px" }}>
+                    {getIconText(selectedPin.icon)}
+                  </span>
+                )}
 
-              {selectedPin.group && (
-                <div
-                  style={{
-                    backgroundColor: "var(--background-modifier-hover)",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    fontSize: "10px",
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  {selectedPin.group}
-                </div>
-              )}
+                {selectedPin.group && (
+                  <div
+                    style={{
+                      backgroundColor: "var(--background-modifier-hover)",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                      fontSize: "10px",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    {selectedPin.group}
+                  </div>
+                )}
+              </div>
 
-              {/* Google Maps icon button - aligned with metadata */}
+              {/* Google Maps button - in normal flow */}
               <button
                 onClick={() => {
                   const url = `https://www.google.com/maps?q=${selectedPin.lat},${selectedPin.lng}`;
                   window.open(url, "_blank");
                 }}
                 style={{
-                  position: "absolute",
-                  right: "0",
-                  top: "0",
                   width: "20px",
                   height: "20px",
                   backgroundColor: "var(--background-modifier-hover)",
@@ -739,6 +738,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                   justifyContent: "center",
                   transition: "all 0.2s",
                   padding: "0",
+                  flexShrink: 0,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor =
