@@ -6,7 +6,7 @@
 
 ```map
 
-[-37.8136, 144.9631] Melbourne CBD
+[40.7589, -73.9851] Times Square
 
 ```
 
@@ -14,7 +14,7 @@
 
 ```map
 
-[-33.8568, 151.2153]
+[40.7128, -74.0060]
 
 ```
 
@@ -30,31 +30,31 @@
 
 ## Multiple Points (Auto-zoom & Centering)
 
-### Australian Cities
+### American Cities
 
 ```map
 
-[-37.8136, 144.9631] Melbourne
+[40.7589, -73.9851] New York
 
-[-33.8688, 151.2093] Sydney
+[34.0522, -118.2437] Los Angeles
 
-[-27.4705, 153.0260] Brisbane
+[41.8781, -87.6298] Chicago
 
-[-31.9505, 115.8605] Perth
+[29.7604, -95.3698] Houston
 
 ```
 
-### Melbourne Attractions (Close zoom)
+### New York Attractions (Close zoom)
 
 ```map
 
-[-37.8136, 144.9631] Melbourne CBD
+[40.7589, -73.9851] Times Square
 
-[-37.8210, 144.9633] Federation Square
+[40.7505, -73.9934] Empire State Building
 
-[-37.8182, 144.9685] Royal Botanic Gardens
+[40.7829, -73.9654] Central Park
 
-[-37.8004, 144.9842] Melbourne Zoo
+[40.7808, -73.9772] American Museum of Natural History
 
 ```
 
@@ -126,7 +126,7 @@
 
 [40.7589, -73.9851] Times Square
 
-[-37.8136, 144.9631] Melbourne CBD
+[40.7505, -73.9934] Empire State Building
 
 [48.8566, 2.3522] Eiffel Tower
 
@@ -166,7 +166,7 @@
 
 [40.7589, -73.9851] Times Square {"color": "red", "icon": "star", "group": "attractions"}
 
-[-37.8136, 144.9631] Melbourne {"color": "blue", "group": "cities"}
+[-37.8136, 144.9631] New York {"color": "blue", "group": "cities"}
 
 [48.8566, 2.3522] Paris {"color": "purple", "group": "cities"}
 
@@ -181,6 +181,146 @@ Available icons: star ⭐, heart ❤️, flag 🚩, pin 📍, home 🏠, office 
 ### Color Reference
 
 Supported colors: red, blue, green, yellow, orange, purple, pink, brown, gray, black, white, or any hex color like "#ff0000"
+
+## Plus Code Support
+
+### Basic Plus Codes
+
+```map
+
+[87G8+Q9] Times Square Area
+
+[87G7+WM] Brooklyn Area
+
+[87G8+2G] Queens Area
+
+```
+
+### Plus Codes with Labels
+
+```map
+
+[87G8+Q9 New York, NY] America's largest city
+
+[87G7+WM Brooklyn, NY] {"color": "red", "icon": "star"}
+
+[87G8+2G Queens, NY] Local neighborhood
+
+```
+
+### Plus Codes with Override Labels
+
+```map
+
+[87G8+Q9 New York, NY] My Custom Label
+
+[87G7+WM Brooklyn, NY] Different Label {"color": "blue"}
+
+```
+
+### Mixed Coordinates and Plus Codes
+
+```map
+
+[87G8+Q9 New York, NY] {"color": "blue", "group": "us-cities"}
+
+[40.7589, -73.9851] Times Square {"color": "red", "group": "us-cities"}
+
+[87G8+2G Queens, NY] {"color": "green", "group": "us-cities"}
+
+[48.8566, 2.3522] Paris {"color": "purple", "group": "eu-cities"}
+
+```
+
+## Comment Descriptions
+
+### Basic Comments
+
+```map
+
+[40.7589, -73.9851] Times Square # Famous tourist attraction in NYC
+
+[87G8+Q9 New York, NY] # America's largest city
+
+[48.8566, 2.3522] Paris # City of lights and romance
+
+```
+
+### Comments with JSON Attributes
+
+```map
+
+[40.7589, -73.9851] Times Square {"color": "red", "icon": "star"} # Tourist hotspot
+
+[87G8+Q9 New York, NY] {"color": "blue"} # America's largest city
+
+[48.8566, 2.3522] Paris {"color": "purple", "group": "europe"} # Romantic destination
+
+```
+
+### Comment Priority over JSON Description
+
+```map
+
+[40.7589, -73.9851] {"description": "JSON description"} # Comment takes preference
+
+[87G8+Q9] {"description": "Will be overridden"} # This comment wins
+
+[48.8566, 2.3522] {"description": "Only used if no comment"}
+
+```
+
+### Multiple Pins with Comments
+
+```map
+
+# Different types of locations with descriptions
+
+[40.7589, -73.9851] Times Square {"color": "red"} # NYC landmark and tourist hub
+
+[87G8+Q9 New York, NY] {"color": "blue"} # America's largest city
+
+[48.8566, 2.3522] Eiffel Tower {"color": "purple"} # Iconic iron tower in Paris
+
+[51.5074, -0.1278] Big Ben {"color": "green"} # Famous clock tower in London
+
+```
+
+## Advanced Examples
+
+### Travel Itinerary with Descriptions
+
+```map
+
+# European Grand Tour
+
+[48.8566, 2.3522] Paris {"color": "red", "icon": "star"} # Start: City of lights, 3 days
+
+[50.8503, 4.3517] Brussels {"color": "orange"} # Day 4: EU capital, famous waffles
+
+[52.3702, 4.8952] Amsterdam {"color": "blue"} # Day 6: Canals and museums
+
+[52.5200, 13.4050] Berlin {"color": "green"} # Day 9: History and culture
+
+[50.0755, 14.4378] Prague {"color": "purple"} # Day 12: Beautiful architecture
+
+```
+
+### Restaurant Guide with Comments
+
+```map
+
+# New York Food Scene
+
+[87G8+Q9] {"color": "red", "icon": "restaurant"} # NY area dining district
+
+[87G7+WM Brooklyn, NY] {"color": "orange"} # Brooklyn area restaurants
+
+[87G8+2G Queens, NY] {"color": "green"} # Queens neighborhood dining
+
+[87F8+XQ Bronx, NY] {"color": "blue"} # Bronx area local cuisine
+
+```
 
 ## Features to Test
 
@@ -203,3 +343,9 @@ Supported colors: red, blue, green, yellow, orange, purple, pink, brown, gray, b
 - **Interactive**: Pan and zoom with mouse/touch
 
 - **Bracket Syntax**: Clean `[lat, lng] label {"attributes"}` syntax only
+
+- **Plus Codes**: Support for `[Plus Code location] label {"attributes"}` format
+
+- **Comments**: Use `# comment` for descriptions that take priority over JSON
+
+- **Descriptions**: Comments become description field for additional context

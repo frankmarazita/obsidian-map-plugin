@@ -10,10 +10,10 @@ describe("calculateBounds", () => {
 
   it("should handle single point", () => {
     const pins: MapPin[] = [
-      { lat: -37.8136, lng: 144.9631, label: "Melbourne" },
+      { lat: 40.7589, lng: -73.9851, label: "New York" },
     ];
     const result = calculateBounds(pins);
-    expect(result).toEqual({ center: [144.9631, -37.8136], zoom: 15 });
+    expect(result).toEqual({ center: [-73.9851, 40.7589], zoom: 15 });
   });
 
   it("should handle close points with high zoom", () => {
