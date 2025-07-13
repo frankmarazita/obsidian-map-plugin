@@ -12,6 +12,132 @@ import "ol/ol.css";
 import { calculateBounds } from "./calculateBounds";
 import { type MapPin } from "./parseMapSyntax";
 
+interface GroupDropdownProps {
+  groups: string[];
+  hiddenGroups: Set<string>;
+  onToggleGroup: (group: string) => void;
+}
+
+const GroupDropdown: React.FC<GroupDropdownProps> = ({
+  groups,
+  hiddenGroups,
+  onToggleGroup,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          height: "28px",
+          backgroundColor: "rgba(0, 0, 0, 0.7)",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer",
+          fontSize: "12px",
+          padding: "0 8px",
+          minWidth: "70px",
+          color: "white",
+          backdropFilter: "blur(4px)",
+          transition: "background-color 0.2s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+        }}
+        title="Toggle pin groups"
+      >
+        🏷️ Groups
+      </button>
+      {isOpen && (
+        <>
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 999,
+            }}
+            onClick={() => setIsOpen(false)}
+          />
+          <div
+            style={{
+              position: "absolute",
+              bottom: "100%",
+              right: 0,
+              marginBottom: "4px",
+              backgroundColor: "var(--background-primary)",
+              border: "1px solid var(--background-modifier-border)",
+              borderRadius: "6px",
+              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.15)",
+              minWidth: "140px",
+              maxWidth: "200px",
+              zIndex: 1000,
+              backdropFilter: "blur(8px)",
+              overflow: "hidden",
+            }}
+          >
+            {groups.map((group, index) => (
+              <div
+                key={group}
+                onClick={() => {
+                  onToggleGroup(group);
+                  setIsOpen(false);
+                }}
+                style={{
+                  padding: "10px 14px",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: "500",
+                  color: "var(--text-normal)",
+                  backgroundColor: "transparent",
+                  borderBottom:
+                    index === groups.length - 1
+                      ? "none"
+                      : "1px solid var(--background-modifier-border-hover)",
+                  transition: "all 0.15s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "var(--background-modifier-hover)";
+                  e.currentTarget.style.color = "var(--text-accent)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "var(--text-normal)";
+                }}
+              >
+                <span style={{ 
+                  fontSize: "14px", 
+                  fontWeight: "600",
+                  color: hiddenGroups.has(group) ? "var(--text-muted)" : "var(--text-accent)"
+                }}>
+                  {hiddenGroups.has(group) ? "☐" : "☑"}
+                </span>
+                <span style={{ 
+                  flex: 1,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
+                }}>
+                  {group}
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 interface MapComponentProps {
   pins: MapPin[];
   initialCenter: [number, number];
@@ -203,49 +329,19 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       >
         {/* Group filter dropdown */}
         {groups.length > 0 && (
-          <select
-            value=""
-            onChange={(e) => {
-              const group = e.target.value;
-              if (group) {
-                const newHiddenGroups = new Set(hiddenGroups);
-                if (hiddenGroups.has(group)) {
-                  newHiddenGroups.delete(group);
-                } else {
-                  newHiddenGroups.add(group);
-                }
-                setHiddenGroups(newHiddenGroups);
-                e.target.value = ""; // Reset selection
+          <GroupDropdown
+            groups={groups}
+            hiddenGroups={hiddenGroups}
+            onToggleGroup={(group) => {
+              const newHiddenGroups = new Set(hiddenGroups);
+              if (hiddenGroups.has(group)) {
+                newHiddenGroups.delete(group);
+              } else {
+                newHiddenGroups.add(group);
               }
+              setHiddenGroups(newHiddenGroups);
             }}
-            style={{
-              height: "28px",
-              backgroundColor: "rgba(0, 0, 0, 0.7)",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "12px",
-              padding: "0 8px",
-              minWidth: "70px",
-              color: "white",
-              backdropFilter: "blur(4px)",
-              transition: "background-color 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
-            }}
-            title="Toggle pin groups"
-          >
-            <option value="">🏷️ Groups</option>
-            {groups.map((group) => (
-              <option key={group} value={group} style={{ color: "black" }}>
-                {hiddenGroups.has(group) ? "☐" : "☑"} {group}
-              </option>
-            ))}
-          </select>
+          />
         )}
 
         {/* Reset button */}
