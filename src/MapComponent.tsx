@@ -162,6 +162,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
 
   // Group filtering state
   const [hiddenGroups, setHiddenGroups] = useState<Set<string>>(new Set());
+  
+  // Pin selection state
+  const [selectedPin, setSelectedPin] = useState<MapPin | null>(null);
 
   // Get unique groups from pins
   const groups = Array.from(
@@ -204,6 +207,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       style: (feature) => {
         const name = feature.get("name");
         const pin = feature.get("pin") as MapPin;
+        const isSelected = selectedPin === pin;
 
         // Get pin color or use configured default
         const pinColor = getColorValue(pin.color) || defaultPinColor;
@@ -213,13 +217,16 @@ export const MapComponent: React.FC<MapComponentProps> = ({
 
         const styles = [];
 
-        // Main pin circle (configurable size)
+        // Main pin circle (configurable size) with selection highlighting
         styles.push(
           new Style({
             image: new Circle({
-              radius: pinSize,
+              radius: isSelected ? pinSize + 3 : pinSize,
               fill: new Fill({ color: pinColor }),
-              stroke: new Stroke({ color: "#ffffff", width: 3 }),
+              stroke: new Stroke({ 
+                color: isSelected ? "#ffd700" : "#ffffff", 
+                width: isSelected ? 4 : 3 
+              }),
             }),
           })
         );
@@ -279,6 +286,37 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       }),
     });
 
+    // Add click handler for pin selection
+    map.on('click', (event) => {
+      const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => {
+        return feature;
+      });
+      
+      if (feature) {
+        const clickedPin = feature.get('pin') as MapPin;
+        if (selectedPin && selectedPin === clickedPin) {
+          // Deselect if clicking the same pin
+          setSelectedPin(null);
+        } else {
+          // Select the clicked pin
+          setSelectedPin(clickedPin);
+        }
+      } else {
+        // Click on empty area, deselect
+        setSelectedPin(null);
+      }
+    });
+
+    // Add pointer cursor on pin hover
+    map.on('pointermove', (event) => {
+      const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => {
+        return feature;
+      });
+      
+      // Change cursor to pointer when hovering over a pin
+      map.getTargetElement().style.cursor = feature ? 'pointer' : '';
+    });
+
     olMapRef.current = map;
 
     return () => {
@@ -295,6 +333,83 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     defaultPinColor,
     hiddenGroups,
   ]);
+
+  // Separate effect to update pin styles when selection changes (without recreating map)
+  useEffect(() => {
+    if (!olMapRef.current) return;
+
+    const layers = olMapRef.current.getLayers().getArray();
+    const vectorLayer = layers.find(layer => layer instanceof VectorLayer) as VectorLayer<VectorSource>;
+    
+    if (vectorLayer) {
+      // Update the style function to use current selectedPin value
+      vectorLayer.setStyle((feature) => {
+        const name = feature.get("name");
+        const pin = feature.get("pin") as MapPin;
+        const isSelected = selectedPin === pin;
+
+        // Get pin color or use configured default
+        const pinColor = getColorValue(pin.color) || defaultPinColor;
+
+        // Get icon text or use default circle
+        const iconText = getIconText(pin.icon);
+
+        const styles = [];
+
+        // Main pin circle (configurable size) with selection highlighting
+        styles.push(
+          new Style({
+            image: new Circle({
+              radius: isSelected ? pinSize + 3 : pinSize,
+              fill: new Fill({ color: pinColor }),
+              stroke: new Stroke({ 
+                color: isSelected ? "#ffd700" : "#ffffff", 
+                width: isSelected ? 4 : 3 
+              }),
+            }),
+          })
+        );
+
+        // Icon inside the pin (if icon is specified)
+        if (iconText) {
+          // Scale icon size with pin size (roughly 50% of pin diameter to prevent clipping)
+          const iconFontSize = Math.max(8, Math.round(pinSize * 1.0));
+          styles.push(
+            new Style({
+              text: new Text({
+                text: iconText,
+                offsetY: 0, // Center the icon in the pin
+                fill: new Fill({ color: "#ffffff" }),
+                stroke: new Stroke({ color: pinColor, width: 1 }),
+                font: `${iconFontSize}px sans-serif`,
+                textAlign: "center",
+              }),
+            })
+          );
+        }
+
+        // Label above the pin (if label exists)
+        if (name) {
+          styles.push(
+            new Style({
+              text: new Text({
+                text: name,
+                offsetY: -30, // Position above the pin
+                fill: new Fill({ color: "#000000" }),
+                stroke: new Stroke({ color: "#ffffff", width: 3 }),
+                font: "12px sans-serif",
+                textAlign: "center",
+                backgroundFill: new Fill({ color: "rgba(255, 255, 255, 0.8)" }),
+                padding: [2, 4, 2, 4],
+              }),
+            })
+          );
+        }
+
+        return styles;
+      });
+    }
+  }, [selectedPin, pinSize, defaultPinColor]);
 
   const handleReset = () => {
     if (olMapRef.current && initialViewRef.current) {
@@ -317,6 +432,126 @@ export const MapComponent: React.FC<MapComponentProps> = ({
           border: "1px solid var(--background-modifier-border)",
         }}
       />
+      
+      {/* Pin details panel */}
+      {selectedPin && (
+        <div
+          style={{
+            position: "absolute",
+            top: "12px",
+            left: "12px",
+            backgroundColor: "var(--background-primary)",
+            border: "1px solid var(--background-modifier-border)",
+            borderRadius: "8px",
+            padding: "16px",
+            minWidth: "220px",
+            maxWidth: "300px",
+            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
+            backdropFilter: "blur(8px)",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              marginBottom: "12px",
+            }}
+          >
+            <h3
+              style={{
+                margin: 0,
+                fontSize: "14px",
+                fontWeight: "600",
+                color: "var(--text-normal)",
+                lineHeight: "1.2",
+                paddingRight: "24px",
+              }}
+            >
+              {selectedPin.label || "Pin Details"}
+            </h3>
+            <button
+              onClick={() => setSelectedPin(null)}
+              style={{
+                position: "absolute",
+                top: "0",
+                right: "0",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "16px",
+                color: "var(--text-muted)",
+                padding: "0",
+                lineHeight: "1",
+                width: "20px",
+                height: "20px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              title="Close details"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "var(--text-normal)";
+                e.currentTarget.style.backgroundColor = "var(--background-modifier-hover)";
+                e.currentTarget.style.borderRadius = "3px";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "var(--text-muted)";
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
+            >
+              ×
+            </button>
+          </div>
+          
+          <div style={{ color: "var(--text-normal)", fontSize: "12px" }}>
+            <div style={{ marginBottom: "8px" }}>
+              <div style={{ fontFamily: "monospace", color: "var(--text-muted)", fontSize: "11px" }}>
+                {selectedPin.lat.toFixed(6)}, {selectedPin.lng.toFixed(6)}
+              </div>
+            </div>
+            
+            {selectedPin.description && (
+              <div style={{ marginBottom: "8px" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>
+                  {selectedPin.description}
+                </div>
+              </div>
+            )}
+            
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
+              {selectedPin.color && (
+                <div
+                  style={{
+                    width: "12px",
+                    height: "12px",
+                    borderRadius: "50%",
+                    backgroundColor: getColorValue(selectedPin.color) || defaultPinColor,
+                    border: "1px solid var(--background-modifier-border)",
+                  }}
+                />
+              )}
+              
+              {selectedPin.icon && (
+                <span style={{ fontSize: "12px" }}>
+                  {getIconText(selectedPin.icon)}
+                </span>
+              )}
+              
+              {selectedPin.group && (
+                <div style={{ 
+                  backgroundColor: "var(--background-modifier-hover)",
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                  fontSize: "10px",
+                  color: "var(--text-muted)"
+                }}>
+                  {selectedPin.group}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <div
         style={{
           position: "absolute",
