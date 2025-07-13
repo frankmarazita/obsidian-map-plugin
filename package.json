@@ -2,7 +2,7 @@
   "name": "map-plugin",
   "version": "1.0.0",
   "description": "Embed OpenStreetMap maps in your Obsidian notes using coordinates",
-  "main": "dist/main.js",
+  "main": "main.js",
   "scripts": {
     "dev": "bun run esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && bun run esbuild.config.mjs production",

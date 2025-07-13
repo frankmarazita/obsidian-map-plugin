@@ -9,7 +9,8 @@
 node_modules
 
 # builds
-dist
+main.js
+main.css
 
 # Exclude sourcemaps
 *.map
