@@ -342,6 +342,31 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     hiddenGroups,
   ]);
 
+  // Separate effect to recalculate bounds when groups change
+  useEffect(() => {
+    if (!olMapRef.current) return;
+
+    // Filter pins based on current hidden groups
+    const visiblePins = pins.filter(
+      (pin) => !pin.group || !hiddenGroups.has(pin.group)
+    );
+
+    // Only recalculate if we have visible pins and the map is already created
+    if (visiblePins.length > 0) {
+      const optimalView = visiblePins.length > 1
+        ? calculateBounds(visiblePins)
+        : { center: [visiblePins[0].lng, visiblePins[0].lat] as [number, number], zoom: initialZoom };
+
+      // Update to the new bounds immediately
+      const view = olMapRef.current.getView();
+      view.setCenter(fromLonLat(optimalView.center));
+      view.setZoom(optimalView.zoom);
+
+      // Update the initial view reference for reset button
+      initialViewRef.current = optimalView;
+    }
+  }, [hiddenGroups, pins, initialZoom]);
+
   // Separate effect to update pin styles when selection changes (without recreating map)
   useEffect(() => {
     if (!olMapRef.current) return;
