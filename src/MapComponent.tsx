@@ -684,7 +684,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                 justifyContent: "space-between",
               }}
             >
-              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <div
+                style={{ display: "flex", gap: "8px", alignItems: "center" }}
+              >
                 {selectedPin.color && (
                   <div
                     style={{

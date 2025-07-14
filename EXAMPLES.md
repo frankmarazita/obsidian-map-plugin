@@ -1,4 +1,4 @@
-# Map Plugin Test Cases
+# Map Plugin Examples
 
 ## Basic Functionality
 
@@ -321,31 +321,3 @@ Supported colors: red, blue, green, yellow, orange, purple, pink, brown, gray, b
 [87G8Q2MM+5R Central Park, NY] {"color": "blue"} # Park area cafes and food
 
 ```
-
-## Features to Test
-
-- **Auto-zoom**: Maps automatically fit all pins in view
-
-- **Labels**: Visible above each pin with white background
-
-- **Colors**: Pins can be colored using color attribute
-
-- **Icons**: Pins can display emoji icons instead of default circles
-
-- **Groups**: Pins can be grouped for organization with dropdown filter
-
-- **Group Filtering**: Use the "Groups" dropdown to toggle pin group visibility
-
-- **Reset button**: Bottom-right tools panel (🏠) to return to initial view
-
-- **Smooth animations**: Reset button animates back to optimal view
-
-- **Interactive**: Pan and zoom with mouse/touch
-
-- **Bracket Syntax**: Clean `[lat, lng] label {"attributes"}` syntax only
-
-- **Plus Codes**: Support for `[Plus Code location] label {"attributes"}` format
-
-- **Comments**: Use `# comment` for descriptions that take priority over JSON
-
-- **Descriptions**: Comments become description field for additional context

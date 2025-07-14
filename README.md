@@ -10,31 +10,42 @@ Create a map by adding a `map` code block with coordinates:
 
 ````
 ```map
-40.7589, -73.9851, Times Square
+[40.7589, -73.9851] Times Square
+```
 ````
 
-```
-
 ### Multiple Points
-```
 
+````
 ```map
-51.5074, -0.1278, London
-48.8566, 2.3522, Paris
-52.5200, 13.4050, Berlin
-41.9028, 12.4964, Rome
+[51.5074, -0.1278] London
+[48.8566, 2.3522] Paris
+[52.5200, 13.4050] Berlin
+[41.9028, 12.4964] Rome
 ```
-
-```
+````
 
 ## Syntax
 
-Each line should contain:
+- Each line must contain a coordinate pair
+- Optional label can be added after the coordinates
+- Optional properties can be specified in JSON format after the label
+- Descriptions can be added using `#` for comments after the coordinates
+- Comments are ignored with `#` at the start of the line
+
+```
+# This is a comment
+
+[latitude, longitude]
+
+[latitude, longitude] Label
+
+[latitude, longitude] Label {"color": "red", "icon": "star"}
+
+[latitude, longitude] # My Label
 ```
 
-latitude, longitude[, optional label]
-
-````
+See [EXAMPLES.md](EXAMPLES.md) for more detailed examples.
 
 ## Controls
 
@@ -44,10 +55,9 @@ latitude, longitude[, optional label]
 
 ## Installation
 
-1. Download the latest release
-2. Extract to your `.obsidian/plugins/` folder
+1. Clone this repository to your `.obsidian/plugins/` folder
+2. Run `bun install` and `bun run build` to compile the plugin
 3. Enable the plugin in Obsidian settings
-
 
 ## Technical Details
 
@@ -63,19 +73,12 @@ This project uses **Bun** for package management and testing:
 # Install dependencies
 bun install
 
-# Development build with watch mode
-bun run dev
-
 # Production build
 bun run build
 
 # Run unit tests
-bun test
+bun run test
 
-# Version bump
-bun run version
-````
-
-### Testing
-
-Run tests with `bun test` to verify all functionality works correctly.
+# Format code
+bun run format
+```
