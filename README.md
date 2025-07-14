@@ -30,7 +30,7 @@ Create a map by adding a `map` code block with coordinates:
 - Each line must contain a coordinate pair
 - Optional label can be added after the coordinates
 - Optional properties can be specified in JSON format after the label
-- Descriptions can be added using `#` for comments after the coordinates
+- Descriptions can be added using `#` at the end of the line
 - Comments are ignored with `#` at the start of the line
 
 ```
@@ -38,14 +38,14 @@ Create a map by adding a `map` code block with coordinates:
 
 [latitude, longitude]
 
-[latitude, longitude] Label
+[latitude, longitude] My Label
 
-[latitude, longitude] Label {"color": "red", "icon": "star"}
+[latitude, longitude] My Label {"color": "red", "icon": "star"}
 
-[latitude, longitude] # My Label
+[latitude, longitude] # My Description
 ```
 
-See [EXAMPLES.md](EXAMPLES.md) for more detailed examples.
+See [EXAMPLES.md](EXAMPLES.md) for more detailed examples. Paste the code blocks into your Obsidian notes to see them in action.
 
 ## Controls
 
