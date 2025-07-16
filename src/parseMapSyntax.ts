@@ -82,6 +82,52 @@ export function parseMapSyntax(source: string): ParsedMapData {
 }
 
 /**
+ * Find the index of a comment (#) that is not inside a JSON object or quoted string
+ * This prevents hex colors like #ff0000 from being treated as comments
+ */
+function findCommentIndex(line: string): number {
+  let insideQuotes = false;
+  let quoteChar = '';
+  let braceDepth = 0;
+  let escaped = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    
+    if (char === '\\') {
+      escaped = true;
+      continue;
+    }
+    
+    if (insideQuotes) {
+      if (char === quoteChar) {
+        insideQuotes = false;
+        quoteChar = '';
+      }
+    } else {
+      if (char === '"' || char === "'") {
+        insideQuotes = true;
+        quoteChar = char;
+      } else if (char === '{') {
+        braceDepth++;
+      } else if (char === '}') {
+        braceDepth--;
+      } else if (char === '#' && braceDepth === 0) {
+        // Found a comment outside of JSON and quotes
+        return i;
+      }
+    }
+  }
+  
+  return -1;
+}
+
+/**
  * Parse a single line of map syntax
  * Examples:
  * [40.7589, -73.9851] Times Square
@@ -100,7 +146,7 @@ function parseMapLine(line: string): MapPin | null {
   // Extract comment from end of line first
   let workingLine = line;
   let comment = "";
-  const commentIndex = line.indexOf("#");
+  const commentIndex = findCommentIndex(line);
   if (commentIndex !== -1) {
     comment = line.substring(commentIndex + 1).trim();
     workingLine = line.substring(0, commentIndex).trim();
