@@ -9,6 +9,7 @@ export interface MapPin {
   group?: string;
   description?: string;
   plusCode?: string;
+  link?: string;
 }
 
 export interface MapConfig {
@@ -139,6 +140,7 @@ function findCommentIndex(line: string): number {
  * [87G8+Q9 New York, NY] {"color": "blue"}
  * [87G8+Q9 New York, NY] My Label {"color": "blue"} # Comment description
  * [40.7589, -73.9851] {"description": "JSON description"} # Comment takes preference
+ * [40.7589, -73.9851] {"link": "https://example.com"} # Clickable link icon in data viewer
  */
 function parseMapLine(line: string): MapPin | null {
   if (!line.trim()) return null;
@@ -246,6 +248,9 @@ function parseRemainderAndApply(pin: MapPin, remainder: string): MapPin {
           typeof attributes.description === "string"
         ) {
           pin.description = attributes.description;
+        }
+        if (attributes.link && typeof attributes.link === "string") {
+          pin.link = attributes.link;
         }
       }
     } catch (error) {

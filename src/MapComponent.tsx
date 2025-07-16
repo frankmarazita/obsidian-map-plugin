@@ -522,6 +522,43 @@ export const MapComponent: React.FC<MapComponentProps> = ({
               marginBottom: "12px",
             }}
           >
+            {selectedPin.link && (
+              <button
+                onClick={() => {
+                  window.open(selectedPin.link, "_blank");
+                }}
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  left: "0",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  color: "var(--text-muted)",
+                  padding: "0",
+                  lineHeight: "1",
+                  width: "20px",
+                  height: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                title="Open link"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "var(--text-normal)";
+                  e.currentTarget.style.backgroundColor =
+                    "var(--background-modifier-hover)";
+                  e.currentTarget.style.borderRadius = "3px";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "var(--text-muted)";
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
+              >
+                🔗
+              </button>
+            )}
             <h3
               style={{
                 margin: 0,
@@ -530,6 +567,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
                 color: "var(--text-normal)",
                 lineHeight: "1.2",
                 paddingRight: "24px",
+                paddingLeft: selectedPin.link ? "24px" : "0",
               }}
             >
               {selectedPin.label || "Pin Details"}
