@@ -11,9 +11,14 @@ export interface MapPin {
   plusCode?: string;
 }
 
+export interface MapConfig {
+  mapLayerURL?: string;
+}
+
 export interface ParsedMapData {
   pins: MapPin[];
   errors: string[];
+  config?: MapConfig;
 }
 
 /**
@@ -22,10 +27,37 @@ export interface ParsedMapData {
  * - [lat, lng] optional_label {"optional": "json", "attributes": "here"} # optional comment
  * - [Plus Code location] optional_label_override {"optional": "json", "attributes": "here"} # optional comment
  * - [lat, lng] {"description": "from json"} # comment takes preference over json description
+ * 
+ * With optional YAML frontmatter config:
+ * ---
+ * mapLayerURL: "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+ * ---
+ * 
+ * [lat, lng] label
  */
 export function parseMapSyntax(source: string): ParsedMapData {
-  const lines = source
-    .trim()
+  const trimmedSource = source.trim();
+  let config: MapConfig | undefined;
+  let contentToParse = trimmedSource;
+
+  // Check for YAML frontmatter
+  if (trimmedSource.startsWith('---')) {
+    const frontmatterEndIndex = trimmedSource.indexOf('---', 3);
+    if (frontmatterEndIndex !== -1) {
+      const frontmatterContent = trimmedSource.substring(3, frontmatterEndIndex).trim();
+      contentToParse = trimmedSource.substring(frontmatterEndIndex + 3).trim();
+      
+      // Parse YAML frontmatter for config
+      try {
+        config = parseYamlConfig(frontmatterContent);
+      } catch (error) {
+        // If YAML parsing fails, treat it as content instead
+        contentToParse = trimmedSource;
+      }
+    }
+  }
+
+  const lines = contentToParse
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line && !line.startsWith("#")); // Allow comments
@@ -46,7 +78,7 @@ export function parseMapSyntax(source: string): ParsedMapData {
     }
   }
 
-  return { pins, errors };
+  return { pins, errors, config };
 }
 
 /**
@@ -263,4 +295,34 @@ function parseAttributes(attributesStr: string): Record<string, any> {
   } catch (error) {
     throw new Error("Invalid JSON attributes");
   }
+}
+
+/**
+ * Parse YAML-like config from frontmatter
+ * Simple key: value parser for basic YAML syntax
+ */
+function parseYamlConfig(yamlContent: string): MapConfig {
+  const config: MapConfig = {};
+  const lines = yamlContent.split('\n').map(line => line.trim()).filter(line => line);
+  
+  for (const line of lines) {
+    const colonIndex = line.indexOf(':');
+    if (colonIndex === -1) continue;
+    
+    const key = line.substring(0, colonIndex).trim();
+    let value = line.substring(colonIndex + 1).trim();
+    
+    // Remove quotes if present
+    if ((value.startsWith('"') && value.endsWith('"')) || 
+        (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    
+    // Map known config keys
+    if (key === 'mapLayerURL') {
+      config.mapLayerURL = value;
+    }
+  }
+  
+  return config;
 }

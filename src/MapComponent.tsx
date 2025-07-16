@@ -10,7 +10,7 @@ import { fromLonLat } from "ol/proj";
 import { Style, Fill, Stroke, Circle, Text } from "ol/style";
 import "ol/ol.css";
 import { calculateBounds } from "./calculateBounds";
-import { type MapPin } from "./parseMapSyntax";
+import { type MapPin, type MapConfig } from "./parseMapSyntax";
 import { Notice, App } from "obsidian";
 
 interface GroupDropdownProps {
@@ -156,6 +156,7 @@ interface MapComponentProps {
   onOpenModal?: () => void;
   height?: string;
   app?: App;
+  mapConfig?: MapConfig;
 }
 
 export const MapComponent: React.FC<MapComponentProps> = ({
@@ -167,6 +168,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   onOpenModal,
   height = "400px",
   app,
+  mapConfig,
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const olMapRef = useRef<Map | null>(null);
@@ -296,7 +298,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       controls: [],
       layers: [
         new TileLayer({
-          source: new OSM(),
+          source: new OSM({
+            url: mapConfig?.mapLayerURL,
+          }),
         }),
         vectorLayer,
       ],
@@ -352,6 +356,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
     pinSize,
     defaultPinColor,
     hiddenGroups,
+    mapConfig,
   ]);
 
   // Separate effect to recalculate bounds when groups change

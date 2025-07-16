@@ -47,6 +47,22 @@ Create a map by adding a `map` code block with coordinates:
 
 See [EXAMPLES.md](EXAMPLES.md) for more detailed examples. Paste the code blocks into your Obsidian notes to see them in action.
 
+### Map Configuration
+
+You can configure the map appearance and behavior with the following syntax:
+
+````
+```map
+---
+mapLayerURL: "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+---
+
+[latitude, longitude] My Location
+```
+````
+
+The `mapLayerURL` option allows you to specify a custom tile layer URL. If not provided, the default OpenStreetMap tile layer is used.
+
 ## Controls
 
 - **Pan**: Click and drag to move around

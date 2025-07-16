@@ -2,7 +2,7 @@ import { App, Plugin, PluginSettingTab, Setting, Modal } from "obsidian";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { MapComponent } from "./MapComponent";
-import { parseMapSyntax, type MapPin } from "./parseMapSyntax";
+import { parseMapSyntax, type MapPin, type MapConfig } from "./parseMapSyntax";
 
 interface PluginSettings {
   defaultZoom: number;
@@ -26,18 +26,21 @@ class MapModal extends Modal {
   private pins: MapPin[];
   private initialCenter: [number, number];
   private settings: PluginSettings;
+  private mapConfig?: MapConfig;
   private root: any;
 
   constructor(
     app: App,
     pins: MapPin[],
     initialCenter: [number, number],
-    settings: PluginSettings
+    settings: PluginSettings,
+    mapConfig?: MapConfig
   ) {
     super(app);
     this.pins = pins;
     this.initialCenter = initialCenter;
     this.settings = settings;
+    this.mapConfig = mapConfig;
   }
 
   onOpen() {
@@ -86,6 +89,7 @@ class MapModal extends Modal {
         defaultPinColor: this.settings.defaultPinColor,
         height: "100%",
         app: this.app,
+        mapConfig: this.mapConfig,
       })
     );
   }
@@ -195,12 +199,14 @@ export default class MapPlugin extends Plugin {
           pinSize: this.settings.pinSize,
           defaultPinColor: this.settings.defaultPinColor,
           app: this.app,
+          mapConfig: parseResult.config,
           onOpenModal: () => {
             const modal = new MapModal(
               this.app,
               parseResult.pins,
               initialCenter as [number, number],
-              this.settings
+              this.settings,
+              parseResult.config
             );
             modal.open();
           },
