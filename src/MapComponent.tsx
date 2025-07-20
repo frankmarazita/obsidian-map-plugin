@@ -183,6 +183,9 @@ export const MapComponent: React.FC<MapComponentProps> = ({
   // Pin selection state
   const [selectedPin, setSelectedPin] = useState<MapPin | null>(null);
 
+  // Hover state for labels on hover functionality
+  const [hoveredPin, setHoveredPin] = useState<MapPin | null>(null);
+
   // Get unique groups from pins
   const groups = Array.from(
     new Set(pins.map((pin) => pin.group).filter(Boolean))
@@ -272,7 +275,10 @@ export const MapComponent: React.FC<MapComponentProps> = ({
 
         // Label above the pin (if label exists and is not just coordinates)
         const isCoordinatesOnly = name === `${pin.lat}, ${pin.lng}`;
-        if (name && !isCoordinatesOnly) {
+        const shouldShowLabel = name && !isCoordinatesOnly && 
+          (!mapConfig?.labelsOnHover || hoveredPin === pin || isSelected);
+        
+        if (shouldShowLabel) {
           styles.push(
             new Style({
               text: new Text({
@@ -331,7 +337,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
       }
     });
 
-    // Add pointer cursor on pin hover
+    // Add pointer cursor on pin hover and track hovered pin for label visibility
     map.on("pointermove", (event) => {
       const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => {
         return feature;
@@ -339,6 +345,14 @@ export const MapComponent: React.FC<MapComponentProps> = ({
 
       // Change cursor to pointer when hovering over a pin
       map.getTargetElement().style.cursor = feature ? "pointer" : "";
+      
+      // Update hovered pin for label visibility
+      if (feature) {
+        const pin = feature.get("pin") as MapPin;
+        setHoveredPin(pin);
+      } else {
+        setHoveredPin(null);
+      }
     });
 
     olMapRef.current = map;
@@ -454,7 +468,10 @@ export const MapComponent: React.FC<MapComponentProps> = ({
 
         // Label above the pin (if label exists and is not just coordinates)
         const isCoordinatesOnly = name === `${pin.lat}, ${pin.lng}`;
-        if (name && !isCoordinatesOnly) {
+        const shouldShowLabel = name && !isCoordinatesOnly && 
+          (!mapConfig?.labelsOnHover || hoveredPin === pin || isSelected);
+        
+        if (shouldShowLabel) {
           styles.push(
             new Style({
               text: new Text({
@@ -474,7 +491,7 @@ export const MapComponent: React.FC<MapComponentProps> = ({
         return styles;
       });
     }
-  }, [selectedPin, pinSize, defaultPinColor]);
+  }, [selectedPin, hoveredPin, pinSize, defaultPinColor, mapConfig]);
 
   const handleReset = () => {
     if (olMapRef.current && initialViewRef.current) {

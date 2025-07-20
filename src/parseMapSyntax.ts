@@ -14,6 +14,7 @@ export interface MapPin {
 
 export interface MapConfig {
   mapLayerURL?: string;
+  labelsOnHover?: boolean;
 }
 
 export interface ParsedMapData {
@@ -32,6 +33,7 @@ export interface ParsedMapData {
  * With optional YAML frontmatter config:
  * ---
  * mapLayerURL: "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+ * labelsOnHover: true
  * ---
  * 
  * [lat, lng] label
@@ -372,6 +374,8 @@ function parseYamlConfig(yamlContent: string): MapConfig {
     // Map known config keys
     if (key === 'mapLayerURL') {
       config.mapLayerURL = value;
+    } else if (key === 'labelsOnHover') {
+      config.labelsOnHover = value.toLowerCase() === 'true';
     }
   }
   
